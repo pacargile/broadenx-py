@@ -22,24 +22,24 @@ function c_to_f_string(s) result(str)
 end function c_to_f_string
 
 subroutine broaden(Ai, X1, Bi, X2, N, resol, wli, fluxi, fluxo)bind(c,name='broaden')
-	use iso_c_binding, only: c_double, c_int, c_char, c_null_char
-	integer, parameter :: dp=kind(0.d0)
-	character(kind=c_char,len=1), intent(in) :: Ai(*)
+  use iso_c_binding, only: c_double, c_int, c_char, c_null_char
+  integer, parameter :: dp=kind(0.d0)
+  character(kind=c_char,len=1), intent(in) :: Ai(*)
   character(kind=c_char,len=1), intent(in) :: Bi(*)
   character(len=:), allocatable :: str
 
-	real(c_double), intent(in), value :: X1
+  real(c_double), intent(in), value :: X1
   real(c_double), intent(in), value :: X2
-	integer(c_int), intent(in), value :: N
-	real(c_double), intent(in), value :: resol
-	real(c_double), intent(in) :: wli(N)
-	real(c_double), intent(in) :: fluxi(N)
-	real(c_double), intent(out) :: fluxo(N)
+  integer(c_int), intent(in), value :: N
+  real(c_double), intent(in), value :: resol
+  real(c_double), intent(in) :: wli(N)
+  real(c_double), intent(in) :: fluxi(N)
+  real(c_double), intent(out) :: fluxo(N)
 
-	DIMENSION H(4100000)
-	DIMENSION RED(40000),BLUE(40000)
-	DIMENSION RED1(40000),BLUE1(40000),RED2(40000),BLUE2(40000)
-	EQUIVALENCE (RED(1),RED1(1)),(BLUE(1),BLUE1(1))
+  DIMENSION H(4100000)
+  DIMENSION RED(40000),BLUE(40000)
+  DIMENSION RED1(40000),BLUE1(40000),RED2(40000),BLUE2(40000)
+  EQUIVALENCE (RED(1),RED1(1)),(BLUE(1),BLUE1(1))
 
   INTEGER :: IWL, I, IWL999, IWL1001, IWLNMU, NH, NPROF
   REAL :: RED,BLUE,H,RED1,RED2,BLUE1,BLUE2, WT1, WT2
@@ -53,27 +53,27 @@ subroutine broaden(Ai, X1, Bi, X2, N, resol, wli, fluxi, fluxo)bind(c,name='broa
   B = c_to_f_string(Bi)
 
   ! determine starting wavelength
-	Wbegin = wli(1)
+  Wbegin = wli(1)
 
   ! calclate some useful numbers
-	ratio=1._dp+1._dp/resol
-	Wend=Wbegin*ratio**(N-1)
-	Wcen=(Wbegin+Wend)*.5_dp
-	vstep=2.99792458e5_dp/resol
+  ratio=1._dp+1._dp/resol
+  Wend=Wbegin*ratio**(N-1)
+  Wcen=(Wbegin+Wend)*.5_dp
+  vstep=2.99792458e5_dp/resol
 
   ! determine type of broadening and units
-	FWHM=-1._dp
-	IF(B.EQ.'PM        ')FWHM=X1/WCEN/1000._dp*299792.458_dp
-	IF(B.EQ.'KM        ')FWHM=X1
-	IF(B.EQ.'RESOLUTION')FWHM=299792.458_dp/X1
-	IF(B.EQ.'CM-1      ')FWHM=X1/(1.e7_dp/Wcen)*299792.458_dp
-	IF(FWHM.LT.0.)THEN
+  FWHM=-1._dp
+  IF(B.EQ.'PM        ')FWHM=X1/WCEN/1000._dp*299792.458_dp
+  IF(B.EQ.'KM        ')FWHM=X1
+  IF(B.EQ.'RESOLUTION')FWHM=299792.458_dp/X1
+  IF(B.EQ.'CM-1      ')FWHM=X1/(1.e7_dp/Wcen)*299792.458_dp
+  IF(FWHM.LT.0.)THEN
     print *, B
-		print *, 'BAD B INPUT'
-		CALL EXIT
-	ENDIF
-	FWHM1=FWHM
-	FWHM2=FWHM
+    print *, 'BAD B INPUT'
+    CALL EXIT
+  ENDIF
+  FWHM1=FWHM
+  FWHM2=FWHM
 
   IF(X2.GT.0.)THEN
   IF(B.EQ.'PM        ')FWHM2=X2/WCEN/1000.*299792.458D0
@@ -82,24 +82,24 @@ subroutine broaden(Ai, X1, Bi, X2, N, resol, wli, fluxi, fluxo)bind(c,name='broa
   IF(B.EQ.'CM-1      ')FWHM2=X2/(1.D7/WCEN)*299792.458D0
   ENDIF
 
-	IF(A.EQ.'MACRO     ')GO TO 10
-	IF(A.EQ.'GAUSSIAN  ')GO TO 20
-	IF(A.EQ.'SINX/X    ')GO TO 30
-	IF(A.EQ.'RECT      ')GO TO 40
-	! IF(A.EQ.'PROFILE   ')GO TO 40
+  IF(A.EQ.'MACRO     ')GO TO 10
+  IF(A.EQ.'GAUSSIAN  ')GO TO 20
+  IF(A.EQ.'SINX/X    ')GO TO 30
+  IF(A.EQ.'RECT      ')GO TO 40
+  ! IF(A.EQ.'PROFILE   ')GO TO 40
 
   print *, A
-	print *, 'BAD A INPUT'
-	CALL EXIT
+  print *, 'BAD A INPUT'
+  CALL EXIT
 
   ! Set up broadening kernel for type of broadening
 
-! MACROTURBULENT VELOCITY IN KM
-!   10 print *, 'Calc VMAC Kernel w/ VMAC = ', X1, 'KM/S'
-	 10   VMAC=X1
+  ! MACROTURBULENT VELOCITY IN KM
+  !   10 print *, 'Calc VMAC Kernel w/ VMAC = ', X1, 'KM/S'
+   10   VMAC=X1
       DO 11 I=1,40000
-      	RED(I)=EXP(-(FLOAT(I-1)*VSTEP/VMAC)**2)
-      	IF(RED(I).LT.1.E-5)GO TO 12
+        RED(I)=EXP(-(FLOAT(I-1)*VSTEP/VMAC)**2)
+        IF(RED(I).LT.1.E-5)GO TO 12
    11 CONTINUE
    12 NPROF=I
       RED(1)=RED(1)/2.
@@ -108,7 +108,7 @@ subroutine broaden(Ai, X1, Bi, X2, N, resol, wli, fluxi, fluxo)bind(c,name='broa
    13 SUM=SUM+RED(I)
       SUM=SUM*2.
       DO 14 I=1,NPROF
-	      RED(I)=RED(I)/SUM
+        RED(I)=RED(I)/SUM
    14 BLUE(I)=RED(I)
       GO TO 50
 
@@ -244,8 +244,8 @@ subroutine broaden(Ai, X1, Bi, X2, N, resol, wli, fluxi, fluxo)bind(c,name='broa
 
   ! write broadened spectrum to flux array
   160 DO 170 IWL=1,N
-	      IWLNMU=(IWL+39999)
-	      fluxo(IWL)=H(IWLNMU)
+        IWLNMU=(IWL+39999)
+        fluxo(IWL)=H(IWLNMU)
   170 CONTINUE
 
 end subroutine broaden
