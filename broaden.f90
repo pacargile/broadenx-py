@@ -48,16 +48,20 @@ subroutine broaden(Ai, X1, Bi, X2, N, resol, wli, fluxi, fluxo)bind(c,name='broa
   REAL :: SUM, VMAC
   character(len=10) :: A,B
 
+  ! Change input C strings into Fortran strings
   A = c_to_f_string(Ai)
   B = c_to_f_string(Bi)
 
+  ! determine starting wavelength
 	Wbegin = wli(1)
 
+  ! calclate some useful numbers
 	ratio=1._dp+1._dp/resol
 	Wend=Wbegin*ratio**(N-1)
 	Wcen=(Wbegin+Wend)*.5_dp
 	vstep=2.99792458e5_dp/resol
 
+  ! determine type of broadening and units
 	FWHM=-1._dp
 	IF(B.EQ.'PM        ')FWHM=X1/WCEN/1000._dp*299792.458_dp
 	IF(B.EQ.'KM        ')FWHM=X1
@@ -80,13 +84,15 @@ subroutine broaden(Ai, X1, Bi, X2, N, resol, wli, fluxi, fluxo)bind(c,name='broa
 
 	IF(A.EQ.'MACRO     ')GO TO 10
 	IF(A.EQ.'GAUSSIAN  ')GO TO 20
-	! IF(A.EQ.'SINX/X    ')GO TO 60
-	! IF(A.EQ.'RECT      ')GO TO 30
+	IF(A.EQ.'SINX/X    ')GO TO 30
+	IF(A.EQ.'RECT      ')GO TO 40
 	! IF(A.EQ.'PROFILE   ')GO TO 40
 
   print *, A
 	print *, 'BAD A INPUT'
 	CALL EXIT
+
+  ! Set up broadening kernel for type of broadening
 
 ! MACROTURBULENT VELOCITY IN KM
 !   10 print *, 'Calc VMAC Kernel w/ VMAC = ', X1, 'KM/S'
@@ -111,22 +117,23 @@ subroutine broaden(Ai, X1, Bi, X2, N, resol, wli, fluxi, fluxo)bind(c,name='broa
    20 DO 21 I=1,40000
         RED(I)=EXP(-(FLOAT(I-1)*VSTEP/FWHM*.8325546_dp*2.)**2)
         IF(RED(I).LT.1.D-5)GO TO 22
-   21 CONTINUE
-   22 NPROF=I
+      21 CONTINUE
+      22 NPROF=I
       RED(1)=RED(1)/2.
       SUM=0.
       DO 23 I=1,NPROF
-   23 SUM=SUM+RED(I)
+      23 SUM=SUM+RED(I)
       SUM=SUM*2.
       DO 24 I=1,NPROF
         RED(I)=RED(I)/SUM
-   24 BLUE(I)=RED(I)
+      24 BLUE(I)=RED(I)
+      ! In case of changing broadening kernel
       IF(X2.EQ.0.)GO TO 50
       DO 25 I=1,40000
         RED2(I)=EXP(-(FLOAT(I-1)*VSTEP/FWHM2*.8325546_dp*2.)**2)
         IF(RED2(I).LT.1.D-5)GO TO 26
       25 CONTINUE
-   26 NPROF=I
+      26 NPROF=I
       RED2(1)=RED2(1)/2.
       SUM=0.
       DO 27 I=1,NPROF
@@ -134,9 +141,77 @@ subroutine broaden(Ai, X1, Bi, X2, N, resol, wli, fluxi, fluxo)bind(c,name='broa
       SUM=SUM*2.
       DO 28 I=1,NPROF
       RED2(I)=RED2(I)/SUM
-   28 BLUE2(I)=RED2(I)
+      28 BLUE2(I)=RED2(I)
       GO TO 50
 
+ ! SINX/X INSTRUMENTAL PROFILE HALF WIDTH IN KM  FWHM
+ ! APODIZED BY EXP(-0.06*X**2)
+   30 RED(1)=0.5
+      DO 31 I=2,40000
+        X=(FLOAT(I-1)*VSTEP/FWHM*2.*1.8954942_dp)
+        RED(I)=SIN(X)/X*EXP(-0.06_dp*X**2)
+        IF(ABS(RED(I))+ABS(RED(I-1)).LT.1.D-5)GO TO 62
+      31 CONTINUE
+      32 NPROF=I
+      SUM=0.
+      DO 33 I=1,NPROF
+      33 SUM=SUM+RED(I)
+      SUM=SUM*2.
+      DO 34 I=1,NPROF
+         RED(I)=RED(I)/SUM
+      34 BLUE(I)=RED(I)
+      ! In case of changing broadening kernel
+      IF(X2.GT.0)GO TO 50
+      RED2(1)=0.5
+      DO 35 I=2,40000
+         X=(FLOAT(I-1)*VSTEP/FWHM2*2.*1.8954942_dp)
+         RED2(I)=SIN(X)/X*EXP(-0.06_dp*X**2)
+         IF(ABS(RED2(I))+ABS(RED2(I-1)).LT.1.D-5)GO TO 66
+      35 CONTINUE
+      36 NPROF=I
+      SUM=0.
+      DO 37 I=1,NPROF
+      37 SUM=SUM+RED2(I)
+      SUM=SUM*2.
+      DO 38 I=1,NPROF
+         RED2(I)=RED2(I)/SUM
+      38 BLUE2(I)=RED2(I)
+      GO TO 50
+
+!
+!     RECTANGULAR INSTRUMENTAL PROFILE HALF WIDTH IN KM  FWHM
+   40 XRECT=FWHM/2./VSTEP
+      NRECT=XRECT+1.5
+      NPROF=NRECT
+      DO 41 I=1,NPROF
+      41 RED(I)=1.
+      RED(NPROF)=XRECT+1.5-FLOAT(NRECT)
+      RED(1)=RED(1)/2.
+      SUM=0.
+      DO 43 I=1,NPROF
+      43 SUM=SUM+RED(I)
+      SUM=SUM*2.
+      DO 44 I=1,NPROF
+        RED(I)=RED(I)/SUM
+      44 BLUE(I)=RED(I)
+      IF(X2.EQ.0.)GO TO 50
+      XRECT=FWHM2/2./VSTEP
+      NRECT=XRECT+1.5
+      NPROF=NRECT
+      DO 45 I=1,NPROF
+      45 RED2(I)=1.
+      RED2(NPROF)=XRECT+1.5-FLOAT(NRECT)
+      RED2(1)=RED2(1)/2.
+      SUM=0.
+      DO 46 I=1,NPROF
+      46 SUM=SUM+RED2(I)
+      SUM=SUM*2.
+      DO 47 I=1,NPROF
+         RED2(I)=RED2(I)/SUM
+      47 BLUE2(I)=RED2(I)
+      GO TO 50
+
+  ! Now do the actual broadening
    ! 50 print *, 'Doing the broadening'
 
    50 NH=(N+39999+39999)
@@ -150,7 +225,7 @@ subroutine broaden(Ai, X1, Bi, X2, N, resol, wli, fluxi, fluxo)bind(c,name='broa
             H(IWL1001-I)=H(IWL1001-I)+BLUE(I)*fluxi(IWL)
         153 H(IWL999+I)=H(IWL999+I)+RED(I)*fluxi(IWL)
   157 CONTINUE
-
+      ! If there is a linearly changing broadening kernel
       IF(X2.EQ.0.)GO TO 160
       ! print *, 'Doing left side'
       DO 358 IWL=1,N
@@ -167,12 +242,11 @@ subroutine broaden(Ai, X1, Bi, X2, N, resol, wli, fluxi, fluxo)bind(c,name='broa
           354 H(IWL999+I)=H(IWL999+I)+RED2(I)*fluxi(IWL)*WT2
       357 CONTINUE
 
+  ! write broadened spectrum to flux array
   160 DO 170 IWL=1,N
 	      IWLNMU=(IWL+39999)
 	      fluxo(IWL)=H(IWLNMU)
   170 CONTINUE
-
-
 
 end subroutine broaden
 
