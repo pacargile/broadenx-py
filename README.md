@@ -21,5 +21,7 @@ Example of how to run the code within python:
   res = 3000000.0 # initial resolution of spectrum<br>
   broaddict = {type:'GAUSSIAN','units':'KM','val':3.0} # info for a gaussian broadening of 3 km/s<br>
   
-  brd = broaden.broaden() # initialize the class<br>
-  outspec = brd.broaden(wl,flx,res,broaddict) # do broadening and output a spectrum in a dictionary with keys "WAVE" & "FLUX"<br>
+  # initialize the class <br>
+  brd = broaden.broaden()<br>
+  # do broadening and output a spectrum in a dictionary with keys "WAVE" & "FLUX"<br> 
+  outspec = brd.broaden(wl,flx,res,broaddict)<br>
