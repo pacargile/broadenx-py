@@ -25,7 +25,7 @@ class broaden(object):
 		resol = resolution of input spectrum
 		broaddict = dictionary of info for broadening
 				possible dictionary keys:
-				type: (required) type of broadening (MACRO, GAUSSIAN)
+				type: (required) type of broadening (MACRO, GAUSSIAN, SINX/X, RECT)
 				units: (required) units for broadening:
 				 	PM
 				 	KM
