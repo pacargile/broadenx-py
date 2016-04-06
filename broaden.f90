@@ -41,11 +41,12 @@ subroutine broaden(Ai, X1, Bi, X2, N, resol, wli, fluxi, fluxo)bind(c,name='broa
   DIMENSION RED1(40000),BLUE1(40000),RED2(40000),BLUE2(40000)
   EQUIVALENCE (RED(1),RED1(1)),(BLUE(1),BLUE1(1))
 
-  INTEGER :: IWL, I, IWL999, IWL1001, IWLNMU, NH, NPROF
+  INTEGER :: IWL, I, IWL999, IWL1001, IWLNMU, NH, NPROF, NRECT
   REAL :: RED,BLUE,H,RED1,RED2,BLUE1,BLUE2, WT1, WT2
   REAL :: FWHM, FWHM1, FWHM2
   REAL :: ratio, Wend, Wbegin, Wcen, vstep
   REAL :: SUM, VMAC
+  REAL :: XRECT, X
   character(len=10) :: A,B
 
   ! Change input C strings into Fortran strings
@@ -150,7 +151,7 @@ subroutine broaden(Ai, X1, Bi, X2, N, resol, wli, fluxi, fluxo)bind(c,name='broa
       DO 31 I=2,40000
         X=(FLOAT(I-1)*VSTEP/FWHM*2.*1.8954942_dp)
         RED(I)=SIN(X)/X*EXP(-0.06_dp*X**2)
-        IF(ABS(RED(I))+ABS(RED(I-1)).LT.1.D-5)GO TO 62
+        IF(ABS(RED(I))+ABS(RED(I-1)).LT.1.D-5)GO TO 32
       31 CONTINUE
       32 NPROF=I
       SUM=0.
@@ -166,7 +167,7 @@ subroutine broaden(Ai, X1, Bi, X2, N, resol, wli, fluxi, fluxo)bind(c,name='broa
       DO 35 I=2,40000
          X=(FLOAT(I-1)*VSTEP/FWHM2*2.*1.8954942_dp)
          RED2(I)=SIN(X)/X*EXP(-0.06_dp*X**2)
-         IF(ABS(RED2(I))+ABS(RED2(I-1)).LT.1.D-5)GO TO 66
+         IF(ABS(RED2(I))+ABS(RED2(I-1)).LT.1.D-5)GO TO 36
       35 CONTINUE
       36 NPROF=I
       SUM=0.
