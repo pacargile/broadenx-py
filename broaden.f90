@@ -40,14 +40,14 @@ subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
   DIMENSION RED(40000),BLUE(40000)
   DIMENSION RED1(40000),BLUE1(40000),RED2(40000),BLUE2(40000)
   EQUIVALENCE (RED(1),RED1(1)),(BLUE(1),BLUE1(1))
-  real :: resol
+  real*8 :: resol
 
   INTEGER :: IWL, I, IWL999, IWL1001, IWLNMU, NH, NPROF, NRECT
-  REAL :: RED,BLUE,H,RED1,RED2,BLUE1,BLUE2, WT1, WT2
-  REAL :: FWHM, FWHM1, FWHM2
-  REAL :: ratio, Wend, Wbegin, Wcen, vstep
-  REAL :: SUM, VMAC
-  REAL :: XRECT, X
+  REAL*8 :: RED,BLUE,H,RED1,RED2,BLUE1,BLUE2, WT1, WT2
+  REAL*8 :: FWHM, FWHM1, FWHM2
+  REAL*8 :: ratio, Wend, Wbegin, Wcen, vstep
+  REAL*8 :: SUM, VMAC
+  REAL*8 :: XRECT, X
   character(len=10) :: A,B
 
   ! Change input C strings into Fortran strings
