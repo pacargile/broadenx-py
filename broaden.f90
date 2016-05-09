@@ -60,7 +60,7 @@ subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
   Wend = wli(NWL)
 
   ! calculate the resolution and vstep
-  resol = 1._dp / ( ((Wend/Wbegin)**(1._dp/(NWL-1))) - 1._dp)
+  resol = 1._dp / ( ((Wend/Wbegin)**(1._dp/(N-1))) - 1._dp)
 
   ! calclate some useful numbers
   ! ratio=1._dp+1._dp/resol
