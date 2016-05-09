@@ -31,7 +31,7 @@ subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
   real(c_double), intent(in), value :: X1
   real(c_double), intent(in), value :: X2
   integer(c_int), intent(in), value :: N
-  real(c_double), intent(in), value :: resol
+  ! real(c_double), intent(in), value :: resol
   real(c_double), intent(in) :: wli(N)
   real(c_double), intent(in) :: fluxi(N)
   real(c_double), intent(out) :: fluxo(N)
@@ -57,7 +57,7 @@ subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
   Wbegin = wli(1)
 
   ! determine the ending wavelength
-  Wend = wli(NWL)
+  Wend = wli(N)
 
   ! calculate the resolution and vstep
   resol = 1._dp / ( ((Wend/Wbegin)**(1._dp/(N-1))) - 1._dp)
