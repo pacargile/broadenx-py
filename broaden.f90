@@ -21,7 +21,7 @@ function c_to_f_string(s) result(str)
   str = transfer(s(1:nchars), str)
 end function c_to_f_string
 
-subroutine broaden(Ai, X1, Bi, X2, N, resol, wli, fluxi, fluxo)bind(c,name='broaden')
+subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
   use iso_c_binding, only: c_double, c_int, c_char, c_null_char
   integer, parameter :: dp=kind(0.d0)
   character(kind=c_char,len=1), intent(in) :: Ai(*)
@@ -56,9 +56,15 @@ subroutine broaden(Ai, X1, Bi, X2, N, resol, wli, fluxi, fluxo)bind(c,name='broa
   ! determine starting wavelength
   Wbegin = wli(1)
 
+  ! determine the ending wavelength
+  Wend = wli(NWL)
+
+  ! calculate the resolution and vstep
+  resol = 1._dp / ( ((Wend/Wbegin)**(1._dp/(NWL-1))) - 1._dp)
+
   ! calclate some useful numbers
-  ratio=1._dp+1._dp/resol
-  Wend=Wbegin*ratio**(N-1)
+  ! ratio=1._dp+1._dp/resol
+  ! Wend=Wbegin*ratio**(N-1)
   Wcen=(Wbegin+Wend)*.5_dp
   vstep=2.99792458e5_dp/resol
 

@@ -14,7 +14,7 @@ class broaden(object):
 		# define this useful thing for later
 		self.c_double_p = POINTER(c_double)
 
-	def broaden(self,wli,fluxi,resol,broaddict):
+	def broaden(self,wli,fluxi,broaddict):
 		"""
 		Function to take in wavelength and flux arrays 
 		and output broaden arrays using the fortran 
@@ -70,7 +70,7 @@ class broaden(object):
 			c_char_p(B),
 			c_double(X2),
 			c_int(N), 
-			c_double(resol), 
+			# c_double(resol), 
 			wli.ctypes.data_as(self.c_double_p), 
 			fluxi.ctypes.data_as(self.c_double_p), 
 			fluxo.ctypes.data_as(self.c_double_p)
