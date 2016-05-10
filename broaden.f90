@@ -56,10 +56,13 @@ subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
   B = c_to_f_string(Bi)
 
   ! determine starting wavelength
-  Wbegin = wli(1)
+  ! Wbegin = wli(1)
 
   ! determine the ending wavelength
-  Wend = wli(N)
+  ! Wend = wli(N)
+
+  Wbegin = 1500.00009
+  Wend = 1500.99988
 
   ! calculate the resolution and vstep
   resol = 1._dp / ( ((Wend/Wbegin)**(1._dp/(N-1))) - 1._dp)
@@ -67,8 +70,8 @@ subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
   ! calclate some useful numbers
   ! ratio=1._dp+1._dp/resol
   ! Wend=Wbegin*ratio**(N-1)
-  Wcen=(Wbegin+Wend)*.5_dp
-  vstep=2.99792458e5_dp/resol
+  Wcen=(Wbegin+Wend)*.5
+  vstep=2.99792458D5/resol
 
   ! print *, Wbegin, Wend, resol, vstep
 
@@ -108,6 +111,7 @@ subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
   ! MACROTURBULENT VELOCITY IN KM
   !   10 print *, 'Calc VMAC Kernel w/ VMAC = ', X1, 'KM/S'
    10   VMAC=X1
+      ! print *, 'Calc VMAC Kernel w/ VMAC = ', VMAC, 'KM/S'
       ! DO 11 I=1,20000
       DO 11 I=1,40000   
         RED(I)=EXP(-(FLOAT(I-1)*VSTEP/VMAC)**2)
@@ -225,10 +229,10 @@ subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
 
   ! Now do the actual broadening
    ! 50 print *, 'Doing the broadening'
-   50 WRITE(6,51)(I,RED1(I),BLUE1(I),RED2(I),BLUE2(I),I=1,NPROF)
-   51 FORMAT(I5,4F10.6)
-      NH=(N+39999+39999)
-   ! 50 NH=(N+39999+39999)
+   ! ! 50 WRITE(6,51)(I,RED1(I),BLUE1(I),RED2(I),BLUE2(I),I=1,NPROF)
+   ! ! 51 FORMAT(I5,4F10.6)
+   !    NH=(N+39999+39999)
+   50 NH=(N+39999+39999)
    ! 50 NH=(N+19999+19999)
 
       DO 52 I=1,NH
