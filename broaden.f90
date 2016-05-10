@@ -268,7 +268,7 @@ subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
   160 DO 170 IWL=1,N
         IWLNMU=(IWL+39999)
         ! IWLNMU=(IWL+19999)
-        fluxo(IWL)=H(IWLNMU-1)
+        fluxo(IWL)=H(IWLNMU+1)
   170 CONTINUE
 
 end subroutine broaden
