@@ -54,19 +54,24 @@ subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
   B = c_to_f_string(Bi)
 
   ! determine starting wavelength
-  Wbegin = wli(1)
+  ! Wbegin = wli(1)
 
   ! determine the ending wavelength
-  Wend = wli(N)
+  ! Wend = wli(N)
 
   ! calculate the resolution and vstep
-  resol = 1._dp / ( ((Wend/Wbegin)**(1._dp/(N-1))) - 1._dp)
+  ! resol = 1._dp / ( ((Wend/Wbegin)**(1._dp/(N-1))) - 1._dp)
+
+  Wbegin = 1500.00009
+  Wend = 1500.99988
+  resol = 3000000.0
+  vstep = 0.09993
 
   ! calclate some useful numbers
   ! ratio=1._dp+1._dp/resol
   ! Wend=Wbegin*ratio**(N-1)
   Wcen=(Wbegin+Wend)*.5_dp
-  vstep=2.99792458e5_dp/resol
+  ! vstep=2.99792458e5_dp/resol
 
   print *, Wbegin, Wend, resol, vstep
 
