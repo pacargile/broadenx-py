@@ -2,7 +2,7 @@ module f_wrapper
 
 use iso_c_binding, only: c_double, c_int, c_char, c_null_char
 
-! implicit none
+implicit none
 
 contains
 
@@ -42,11 +42,11 @@ subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
   EQUIVALENCE (RED(1),RED1(1)),(BLUE(1),BLUE1(1))
   REAL*8 :: ratio, Wend, Wbegin, Wcen, vstep, resol
 
-  ! INTEGER :: IWL, I, IWL999, IWL1001, IWLNMU, NH, NPROF, NRECT
-  ! REAL*8 :: RED,BLUE,H,RED1,RED2,BLUE1,BLUE2, WT1, WT2
-  ! REAL*8 :: FWHM, FWHM1, FWHM2
-  ! REAL*8 :: SUM, VMAC
-  ! REAL*8 :: XRECT, X
+  INTEGER :: IWL, I, IWL999, IWL1001, IWLNMU, NH, NPROF, NRECT
+  REAL*8 :: RED,BLUE,H,RED1,RED2,BLUE1,BLUE2, WT1, WT2
+  REAL*8 :: FWHM, FWHM1, FWHM2
+  REAL*8 :: SUM, VMAC
+  REAL*8 :: XRECT, X
   character(len=10) :: A,B
 
   ! Change input C strings into Fortran strings
@@ -67,6 +67,8 @@ subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
   ! Wend=Wbegin*ratio**(N-1)
   Wcen=(Wbegin+Wend)*.5_dp
   vstep=2.99792458e5_dp/resol
+
+  print *, Wbegin, Wend, resol, vstep
 
   ! determine type of broadening and units
   FWHM=-1._dp
