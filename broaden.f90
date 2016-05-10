@@ -37,8 +37,10 @@ subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
   real(c_double), intent(out) :: fluxo(N)
 
   DIMENSION H(4100000)
-  DIMENSION RED(20000),BLUE(20000)
-  DIMENSION RED1(20000),BLUE1(20000),RED2(20000),BLUE2(20000)
+  ! DIMENSION RED(20000),BLUE(20000)
+  ! DIMENSION RED1(20000),BLUE1(20000),RED2(20000),BLUE2(20000)
+  DIMENSION RED(40000),BLUE(40000)
+  DIMENSION RED1(40000),BLUE1(40000),RED2(40000),BLUE2(40000)
   EQUIVALENCE (RED(1),RED1(1)),(BLUE(1),BLUE1(1))
   REAL*8 :: ratio, Wend, Wbegin, Wcen, vstep, resol
 
@@ -106,7 +108,8 @@ subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
   ! MACROTURBULENT VELOCITY IN KM
   !   10 print *, 'Calc VMAC Kernel w/ VMAC = ', X1, 'KM/S'
    10   VMAC=X1
-      DO 11 I=1,20000
+      ! DO 11 I=1,20000
+      DO 11 I=1,40000   
         RED(I)=EXP(-(FLOAT(I-1)*VSTEP/VMAC)**2)
         IF(RED(I).LT.1.E-5)GO TO 12
    11 CONTINUE
@@ -222,18 +225,20 @@ subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
 
   ! Now do the actual broadening
    ! 50 print *, 'Doing the broadening'
-
+   50 WRITE(6,51)(I,RED1(I),BLUE1(I),RED2(I),BLUE2(I),I=1,NPROF)
+   51 FORMAT(I5,4F10.6)
+      NH=(N+39999+39999)
    ! 50 NH=(N+39999+39999)
-   50 NH=(N+19999+19999)
+   ! 50 NH=(N+19999+19999)
 
       DO 52 I=1,NH
    52 H(I)=0.
 
   150 DO 157 IWL=1,N
-        ! IWL1001=IWL+40001
-        ! IWL999=IWL+39999
-        IWL1001=IWL+20001
-        IWL999=IWL+19999
+        IWL1001=IWL+40001
+        IWL999=IWL+39999
+        ! IWL1001=IWL+20001
+        ! IWL999=IWL+19999
         DO 153 I=1,NPROF
             H(IWL1001-I)=H(IWL1001-I)+BLUE(I)*fluxi(IWL)
         153 H(IWL999+I)=H(IWL999+I)+RED(I)*fluxi(IWL)
@@ -244,15 +249,15 @@ subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
       DO 358 IWL=1,N
           WT2=FLOAT(IWL-1)/FLOAT(N-1)
           WT1=1.-WT2
-      ! 358 H(IWL+40000)=H(IWL+40000)*WT1
-      358 H(IWL+20000)=H(IWL+20000)*WT1
+      358 H(IWL+40000)=H(IWL+40000)*WT1
+      ! 358 H(IWL+20000)=H(IWL+20000)*WT1
       ! print *, 'Doing right side'
       DO 357 IWL=1,N
           WT2=FLOAT(IWL-1)/FLOAT(N-1)
-          ! IWL1001=IWL+40001
-          ! IWL999=IWL+39999
-          IWL1001=IWL+20001
-          IWL999=IWL+19999
+          IWL1001=IWL+40001
+          IWL999=IWL+39999
+          ! IWL1001=IWL+20001
+          ! IWL999=IWL+19999
           DO 354 I=1,NPROF
           353 H(IWL1001-I)=H(IWL1001-I)+BLUE2(I)*fluxi(IWL)*WT2
           354 H(IWL999+I)=H(IWL999+I)+RED2(I)*fluxi(IWL)*WT2
@@ -260,8 +265,8 @@ subroutine broaden(Ai, X1, Bi, X2, N, wli, fluxi, fluxo)bind(c,name='broaden')
 
   ! write broadened spectrum to flux array
   160 DO 170 IWL=1,N
-        ! IWLNMU=(IWL+39999)
-        IWLNMU=(IWL+19999)
+        IWLNMU=(IWL+39999)
+        ! IWLNMU=(IWL+19999)
         fluxo(IWL)=H(IWLNMU)
   170 CONTINUE
 
