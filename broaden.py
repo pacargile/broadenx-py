@@ -48,8 +48,8 @@ class broaden(object):
 
 		# define other values used in fortan call
 		N = len(wli) # number of rows in wave/flux arrays
-		A = '{0:10s}'.format(broaddict['type']) # type of broadening
-		B = '{0:10s}'.format(broaddict['units']) # units on broadening type
+		A = bytes('{0:10s}'.format( broaddict['type']),encoding='ascii') # type of broadening
+		B = bytes('{0:10s}'.format(broaddict['units']),encoding='ascii') # units on broadening type
 		if 'val' in broaddict.keys():
 			X1 = float(broaddict['val']) # single broadening value
 			X2 = float(0.0) # set second to zero to turn off
