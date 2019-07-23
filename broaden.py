@@ -9,7 +9,10 @@ class broaden(object):
 		"""
 
 		# read in fortran library with ctype hooks
-		self.fortran = cdll.LoadLibrary('/Users/pcargile/Astro/bin/FORTRAN/SYNTHE/lib/libbroaden.so')
+		try:
+			self.fortran = cdll.LoadLibrary('/Users/pcargile/Astro/bin/FORTRAN/SYNTHE/lib/libbroaden.so')
+		except OSError:
+			self.fortran = cdll.LoadLibrary('/n/conroyfs1/pac/broadenx-py/libbroaden.so')		
 
 		# define this useful thing for later
 		self.c_double_p = POINTER(c_double)
